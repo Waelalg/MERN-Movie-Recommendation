@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import axios from "axios"
-import NavBar from "./Components/Navbar"
+import NavBar from "@/Components/Navbar"
+import "@/App.css"
 
-function App() {
+export default function Page() {
   const [movieName, setMovieName] = useState("")
   const [recommendations, setRecommendations] = useState([])
   const [loading, setLoading] = useState(false)
@@ -23,9 +24,9 @@ function App() {
       const response = await axios.get(`http://127.0.0.1:3050/api/movies/${encodedMovieName}`)
       setRecommendations(response.data)
     } catch (error) {
-      console.error("Error fetching recommendations", error)
-      setError("Failed to fetch recommendations. Please try again.")
+      setError("Movie not found. Try another title.")
       setRecommendations([])
+      console.error("Error fetching recommendations", error)
     } finally {
       setLoading(false)
     }
@@ -44,25 +45,25 @@ function App() {
         {/* Hero Section */}
         <section className="hero-section">
           <div className="hero-content">
-            <h1 className="hero-title">🎬 Movie Recommender</h1>
-            <p className="hero-subtitle">Discover movies similar to your favorites</p>
+            <h1 className="hero-title">Discover Your Next Favorite Movie</h1>
+            <p className="hero-subtitle">Search for any movie and get personalized recommendations</p>
 
+            {/* Search Bar */}
             <div className="search-container">
               <div className="search-input-wrapper">
                 <input
                   type="text"
                   className="search-input"
-                  placeholder="Enter a movie name (e.g., Avatar, Spider-Man)"
+                  placeholder="Enter a movie title..."
                   value={movieName}
                   onChange={(e) => setMovieName(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  disabled={loading}
                 />
                 <button className="search-button" onClick={fetchRecommendations} disabled={loading}>
-                  {loading ? "Loading..." : "Get Recommendations"}
+                  {loading ? "Searching..." : "Search"}
                 </button>
               </div>
-              {error && <div className="error-message">{error}</div>}
+              {error && <p className="error-message">{error}</p>}
             </div>
           </div>
         </section>
@@ -71,8 +72,8 @@ function App() {
         {recommendations.length > 0 && (
           <section className="recommendations-section">
             <div className="section-header">
-              <h2>Recommended Movies</h2>
-              <p className="result-count">Found {recommendations.length} recommendations</p>
+              <h2>Recommended For You</h2>
+              <p className="result-count">{recommendations.length} movies found</p>
             </div>
 
             <div className="movies-grid">
@@ -81,20 +82,22 @@ function App() {
                   <div className="movie-card-header">
                     <h3 className="movie-title">{movie.title}</h3>
                   </div>
+
                   <div className="movie-card-body">
-                    <p className={`movie-tagline ${!movie.tagline ? "no-tagline" : ""}`}>
-                      {movie.tagline || "No tagline available"}
-                    </p>
+                    {movie.tagline ? (
+                      <p className="movie-tagline">"{movie.tagline}"</p>
+                    ) : (
+                      <p className="movie-tagline no-tagline">No tagline available</p>
+                    )}
+
                     <div className="movie-info">
                       <div className="info-item">
                         <span className="info-label">Release Date</span>
-                        <span className="info-value">
-                          {movie.release_date ? movie.release_date.slice(0, 10) : "N/A"}
-                        </span>
+                        <span className="info-value">{movie.release_date.slice(0, 10)}</span>
                       </div>
                       <div className="info-item">
                         <span className="info-label">Duration</span>
-                        <span className="info-value">{movie.runtime ? `${movie.runtime} min` : "N/A"}</span>
+                        <span className="info-value">{movie.runtime} min</span>
                       </div>
                     </div>
                   </div>
@@ -105,14 +108,12 @@ function App() {
         )}
 
         {/* Empty State */}
-        {recommendations.length === 0 && !loading && !error && (
-          <section className="recommendations-section">
-            <div className="empty-state">
-              <div className="empty-state-content">
-                <div className="empty-icon">🔍</div>
-                <h3>Search for a movie</h3>
-                <p>Enter a movie name above to get personalized recommendations</p>
-              </div>
+        {recommendations.length === 0 && !loading && (
+          <section className="empty-state">
+            <div className="empty-state-content">
+              <div className="empty-icon">🎬</div>
+              <h3>Start Exploring</h3>
+              <p>Search for a movie to get personalized recommendations</p>
             </div>
           </section>
         )}
@@ -120,5 +121,3 @@ function App() {
     </>
   )
 }
-
-export default App
